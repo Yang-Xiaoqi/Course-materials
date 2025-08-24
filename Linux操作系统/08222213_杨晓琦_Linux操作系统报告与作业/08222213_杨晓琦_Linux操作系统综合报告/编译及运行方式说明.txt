@@ -1,0 +1,9 @@
+编译：
+mkdir -p bin
+gcc -std=c99 server/main.c server/client_handler.c server/logger.c shared/utils.c -o bin/server.out -lpthread
+gcc -std=c99 client/main.c client/ui.c client/network.c shared/utils.c -lncurses -lpthread -o bin/client.out
+
+运行：
+./bin/server.out
+./bin/client.out
+

@@ -1,0 +1,19 @@
+背景图层 天空、岩石、草地
+弹弓 左半部分和右半部分
+鸟 写脚本：跟随鼠标按下的位置移动
+弹簧：line renderer线渲染器
+
+Rigidbody2D：刚体
+发射出去的速度=两点之前的单位向量×飞行速度
+angular drag旋转时候的角阻力
+Box Collider 2D碰撞检测
+collision.relativeVelocity
+
+boom动画12帧动画
+切换下一只鸟的逻辑：上一只鸟发射5s后
+
+gamemanager脚本：
+加载下一只小鸟，判断游戏win还是lose
+音效控制 audioclip
+
+黑色爆炸鸟：CircleCollider2D碰撞器组件 这里我设置1m

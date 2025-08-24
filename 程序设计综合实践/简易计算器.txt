@@ -1,0 +1,265 @@
+import tkinter as t
+from tkinter import *   #加了之后，可以不加t前缀
+import re
+root = t.Tk()
+root.title("计算器")
+root.geometry("650x725+400+20") #用geometry()方法可以设置窗体的大小
+root.resizable(0, 0)           #Button  按钮 单击出发事件
+contentVar = t.StringVar(root, '')   #Entry  输入框
+contentEntry = t.Entry(root, textvariable=contentVar, font=("宋体", 42))
+contentEntry['state'] = 'readonly'
+contentEntry.place(x=25, y=10, width=600, height=80)  #响应鼠标单击事件触发运行程序所设
+btnClear = t.Button(root, text='清空', bg='orange',command=lambda: buttonClick('C'), font=("Arial", 32))
+btnClear.place(x=25, y=90, width=150, height=90) #利用匿名函数调用函数和传递参数。
+btnBackspace = t.Button(root, text='退格', command=lambda: buttonClick('B'), font=("Arial", 32))
+btnBackspace.place(x=175, y=90, width=150, height=90)
+btnCompute = t.Button(root, fg='green',text='=', command=lambda: buttonClick('='), font=("Arial", 32))
+btnCompute.place(x=325, y=90, width=150, height=90)
+btnFunction = t.Button(root, fg='blue',text='贷款计算器', command=lambda: buttonClick('E'), font=("Arial", 32))
+btnFunction.place(x=25, y=540, width=450, height=90)
+btnFunction = t.Button(root, fg='blue',text='进制转换', command=lambda: buttonClick('F'), font=("Arial", 32))
+btnFunction.place(x=25, y=630, width=300, height=90)
+btnFunction = t.Button(root, fg='blue',text='汇率转换', command=lambda: buttonClick('G'), font=("Arial", 32))
+btnFunction.place(x=325, y=630, width=300, height=90)
+digits = list('0123456789.') + ['Sqrt']
+index = 0
+for row in range(4):
+    for col in range(3):
+        d = digits[index]
+        index += 1
+        btnDigit = t.Button(root, text=d, command=lambda x=d: buttonClick(x), font=("Arial", 32))
+        btnDigit.place(x=25 + col * 150, y=180 + row * 90, width=150, height=90)
+operators = ('+', '-', '*', '/', '**', '//')
+for index, operator in enumerate(operators):
+    btnOperator = t.Button(root,fg='red', text=operator, command=lambda x=operator: buttonClick(x), font=("宋体", 32))
+    btnOperator.place(x=475, y=90 + index * 90, width=150, height=90)
+def buttonClick(btn):
+    content = contentVar.get()
+    if content.startswith('.'):
+        content = '0' + content
+    if btn in "0123456789":
+        content += btn
+    elif btn == '.':
+        lastPart = re.split(r'\+|-|\*|/', content)[-1]
+        if '.' in lastPart:
+            t.messagebox.showerror('错误', '小数点多了')
+            return
+        else:
+            content += btn
+    elif btn == 'C':
+        content = ''
+    elif btn == '=':
+        try:
+            content = str(eval(content))
+        except:
+            t.messagebox.showerror('错误', '表达式错误')
+            return
+    elif btn == 'B':
+        content = content[0:len(content) - 1]
+    elif btn == 'E':
+        window1 = t.Tk()
+        window1.title("贷款计算器")
+        window1.geometry("650x550+500+80")
+ # 等额本息每月还款金额=〔贷款本金×月利率×（1＋月利率）＾还款月数〕÷〔（1＋月利率）＾还款月数－1〕
+ # 等额本金每月还款金额=（贷款本金/还款月数）+（本金-已归还本金累计额）×每月利率。
+        def run1(x,y,z):
+            a=eval(x) #贷款年限
+            b=eval(y) #贷款金额
+            c=eval(z)/100 #贷款年利率
+            d=12*a #总月数
+            e=c/12 #月利率
+            m=(b*(e*(1+e)**d))/((1+e)**(d)-1)
+            o=m*d
+            n=o-b
+            mm=round(m,2)
+            oo=round(o,2)
+            nn=round(n,2)
+            txt1.delete(0.0, END)
+            txt2.delete(0.0, END)
+            txt3.delete(0.0, END)
+            txt1.insert(END,str(mm))
+            txt3.insert(END,str(oo))
+            txt2.insert(END,str(nn))
+        def run2(x,y,z):
+            a = eval(x) #年限
+            b = eval(y) #金额
+            c = eval(z) / 100 #利率
+            d = 12 * a #总月数
+            e = c / 12 #月利率
+            m1=b/d+b*e  #金额/总月数+金额*月利率
+            m2=b/d*e    #(金额/总月数)×月利率
+            n=d*b*e-d*(d-1)*b*e/(2*d)
+            o=n+b
+            mm1=round(m1,2)
+            mm2=round(m2,2)
+            mm="首月："+str(mm1)+"  之后在此基础上减："+str(mm2)
+            nn=round(n,2)
+            oo=round(o,2)
+            txt1.delete(0.0, END)
+            txt2.delete(0.0, END)
+            txt3.delete(0.0, END)
+            txt1.insert(END, mm)
+            txt2.insert(END, nn)
+            txt3.insert(END, oo)
+        def run3():
+            inp1.delete(0, END)  # 清空输入
+            inp2.delete(0, END)
+            inp3.delete(0, END)
+            txt1.delete(0.0, END)
+            txt2.delete(0.0, END)
+            txt3.delete(0.0, END)
+        lb1=Label(window1,text='贷款年限(年):', font=("Arial", 16))
+        lb1.place(x=50,y=50,width=150,height=50)
+        inp1=Entry(window1, font=("宋体", 16))
+        inp1.place(x=200,y=50,width=400,height=50)
+        lb2=Label(window1,text='贷款金额(万元):', font=("Arial", 16))
+        lb2.place(x=50,y=100,width=150,height=50)
+        inp2=Entry(window1, font=("Arial", 16))
+        inp2.place(x=200,y=100,width=400,height=50)
+        lb3=Label(window1,text="贷款年利率(%):", font=("Arial", 16))
+        lb3.place(x=50,y=150,width=150,height=50)
+        inp3=Entry(window1, font=("Arial", 16))
+        inp3.place(x=200,y=150,width=400,height=50)
+        bon1=Button(window1,text='等额本息',command=lambda:run1(inp1.get(),inp2.get(),inp3.get()), font=("宋体", 16))
+        bon1.place(x=100,y=210,width=200,height=50)
+        bon2=Button(window1,text='等额本金',command=lambda:run2(inp1.get(),inp2.get(),inp3.get()), font=("宋体", 16))
+        bon2.place(x=320,y=210,width=200,height=50)
+        lb4=Label(window1,text='月均还款(万元):', font=("Arial", 16))
+        lb4.place(x=50,y=270,width=150,height=50)
+        txt1=Text(window1, font=("宋体", 16))
+        txt1.place(x=200,y=270,width=400,height=50)
+        lb5=Label(window1,text='利息总额(万元):', font=("Arial", 16))
+        lb5.place(x=50,y=320,width=150,height=50)
+        txt2=Text(window1, font=("宋体", 16))
+        txt2.place(x=200,y=320,width=400,height=50)
+        lb6=Label(window1,text='还款总额(万元):', font=("Arial", 16))
+        lb6.place(x=50,y=370,width=150,height=50)
+        txt3=Text(window1, font=("宋体", 16))
+        txt3.place(x=200,y=370,width=400,height=50)
+        bon4 = Button(window1, text='清除', command=lambda: run3(), font=("Arial", 16))
+        bon4.place(x=550, y=210, width=50, height=50)
+        tip=Label(window1,text='注：依次输入贷款年限（年）、贷款金额（万元）、贷款年利率（%）',fg='red' ,font=("宋体", 16))
+        tip.place(x=0,y=450,width=650,height=60)
+        window1.mainloop()
+    elif btn == 'F':
+        window2 = t.Tk()
+        window2.title("进制转换")
+        window2.geometry("650x500+500+80")
+        def run1(x):
+            a=eval(x)
+            num=bin(a)
+            txt1.insert(END,str(num))
+        def run2(x):
+            a=eval(x)
+            num=oct(a)
+            txt2.insert(END, str(num))
+        def run3(x):
+            a=eval(x)
+            num=hex(a)
+            txt3.insert(END, str(num))
+        def run4():
+            inp1.delete(0, END)  # 清空输入
+            txt1.delete(0.0,END)
+            txt2.delete(0.0,END)
+            txt3.delete(0.0,END)
+        lb1=Label(window2,text='输入十进制数',font=('Arial',16))
+        lb1.place(x=10, y=0, width=150, height=50)
+        inp1 = Entry(window2, font=("Arial", 16))
+        inp1.place(x=160, y=0, width=400, height=50)
+        bon1 = Button(window2, text='结果', command=lambda: run1(inp1.get()), font=("Arial", 16))
+        bon1.place(x=60, y=50, width=50, height=50)
+        lb2 = Label(window2, text='转换二进制为', font=('宋体', 16))
+        lb2.place(x=10, y=120, width=150, height=50)
+        inp2 = Entry(window2, font=("Arial", 16))
+        inp2.place(x=160, y=120, width=400, height=50)
+        txt1 = Text(window2, font=("Arial", 16))
+        txt1.place(x=160, y=120, width=400, height=50)
+        lb3 = Label(window2, text='转换八进制为', font=('Arial', 16))
+        lb3.place(x=10, y=240, width=150, height=50)
+        inp3 = Entry(window2, font=("Arial", 16))
+        inp3.place(x=160, y=240, width=400, height=50)
+        bon2 = Button(window2, text='结果', command=lambda: run2(inp1.get()), font=("Arial", 16))
+        bon2.place(x=60, y=170, width=50, height=50)
+        txt2 = Text(window2, font=("宋体", 16))
+        txt2.place(x=160, y=240, width=400, height=50)
+        lb4 = Label(window2, text='转换十六进制为', font=('宋体', 16))
+        lb4.place(x=10, y=360, width=150, height=50)
+        inp4 = Entry(window2, font=("Arial", 16))
+        inp4.place(x=160, y=360, width=400, height=50)
+        bon3 = Button(window2, text='结果', command=lambda: run3(inp1.get()), font=("Arial", 16))
+        bon3.place(x=60, y=290, width=50, height=50)
+        txt3 = Text(window2, font=("Arial", 16))
+        txt3.place(x=160, y=360, width=400, height=50)
+        tip = Label(window2,text='注：0b、0o、0x表示前缀',fg='red', font=('Arial',16))
+        tip.place(x=0, y=440, width=300,height=50)
+        bon4 = Button(window2, text='清除', command=lambda: run4(), font=("Arial", 16))
+        bon4.place(x=500, y=420, width=50, height=50)
+        window2.mainloop()
+    elif btn == 'G':
+        window3 = t.Tk()
+        window3.title("汇率转换")
+        window3.geometry("650x500+500+80")
+        def run1(x):
+            a=eval(x)
+            num=a*0.1431
+            txt1.insert(END, str(num))
+        def run2(x):
+            a=eval(x)
+            num=a*0.1426
+            txt2.insert(END, str(num))
+        def run3(x):
+            a=eval(x)
+            num=a*198.394
+            txt3.insert(END, str(num))
+        def run4():
+            inp1.delete(0, END)  # 清空输入
+            txt1.delete(0.0,END)
+            txt2.delete(0.0,END)
+            txt3.delete(0.0,END)
+        lb1 = Label(window3, text='请输入人民币', font=('Arial', 16))
+        lb1.place(x=10, y=0, width=150, height=50)
+        inp1 = Entry(window3, font=("Arial", 16))
+        inp1.place(x=160, y=0, width=400, height=50)
+        bon1 = Button(window3, text='结果', command=lambda: run1(inp1.get()), font=("Arial", 16))
+        bon1.place(x=60, y=50, width=50, height=50)
+        lb2 = Label(window3, text='相对应美元为', font=('Arial', 16))
+        lb2.place(x=10, y=120, width=150, height=50)
+        inp2 = Entry(window3, font=("Arial", 16))
+        inp2.place(x=160, y=120, width=400, height=50)
+        txt1 = Text(window3, font=("Arial", 16))
+        txt1.place(x=160, y=120, width=400, height=50)
+        lb3 = Label(window3, text='相对应欧元为', font=('Arial', 16))
+        lb3.place(x=10, y=240, width=150, height=50)
+        inp3 = Entry(window3, font=("Arial", 16))
+        inp3.place(x=160, y=240, width=400, height=50)
+        bon2 = Button(window3, text='结果', command=lambda: run2(inp1.get()), font=("Arial", 16))
+        bon2.place(x=60, y=170, width=50, height=50)
+        txt2 = Text(window3, font=("Arial", 16))
+        txt2.place(x=160, y=240, width=400, height=50)
+        lb4 = Label(window3, text='相对应韩元为', font=('Arial', 16))
+        lb4.place(x=10, y=360, width=150, height=50)
+        inp4 = Entry(window3, font=("Arial", 16))
+        inp4.place(x=160, y=360, width=400, height=50)
+        bon3 = Button(window3, text='结果', command=lambda: run3(inp1.get()), font=("Arial", 16))
+        bon3.place(x=60, y=290, width=50, height=50)
+        txt3 = Text(window3, font=("Arial", 16))
+        txt3.place(x=160, y=360, width=400, height=50)
+        tip = Label(window3, text='注：汇率会实时变化', fg='red', font=('Arial', 16))
+        tip.place(x=0, y=440, width=300, height=50)
+        bon4 = Button(window3, text='清除', command=lambda: run4(), font=("Arial", 16))
+        bon4.place(x=500, y=420, width=50, height=50)
+        window3.mainloop()
+    elif btn in operators:
+        if content.endswith(operators):
+            t.messagebox.showerror('错误', '不允许存在连续运算符')
+            return
+        content += btn
+    elif btn == 'Sqrt':
+        n = content.split('.')
+        if all(map(lambda x: x.isdigit(), n)):
+            content = eval(content) ** 0.5
+        else:
+            t.messagebox.showerror('错误', '表达式错误')
+            return
+    contentVar.set(content)
+root.mainloop()  #让窗口运行起来

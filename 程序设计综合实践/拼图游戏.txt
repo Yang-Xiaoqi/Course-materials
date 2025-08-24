@@ -1,0 +1,204 @@
+from tkinter import *
+from tkinter import ttk              #主题化的小部件
+from tkinter import filedialog       #文件选择对话框
+from tkinter.messagebox import *     #显示消息框
+from PIL import Image, ImageTk
+import random
+import time
+app = Tk('拼图游戏')  #创建窗口
+app.title('拼图游戏') #窗口标题
+app.geometry("810x600+350+60") #窗口大小
+#app.resizable(0, 0)  #禁止玩家调整大小
+v1 = IntVar()   #IntVar()跟踪整数变量的值 int
+v1.set(1)       #set是集合
+v2 = IntVar()
+v2.set(0)
+f1 = 'img\%s.jpg' % (random.randint(0, 9)) #返回[0,9]之间一个随机数
+img0 = Image.open(f1) #读取文件
+filename = ImageTk.PhotoImage(img0)  #创建变量存放图片
+image_size = img0.size[0]
+
+cut_img = []  #代表列表为可变序列
+move_img = []
+img_state = []
+place_list = []
+#canvas画布
+cv = Canvas(app, bg='white', width=600, height=600)
+cv.pack(side=LEFT)  #left，布局是从左往右
+cv.bind('<Button-1>', )   #bind()鼠标左键绑定,1表左，3表右。create_image是用来绘制图片的
+image = cv.create_image(300, 300, anchor=CENTER, image=filename)
+# 查看原图
+def look():
+    global filename
+    root = Toplevel() #TopLevel()：创建弹出式窗口
+    cv = Canvas(root, bg='white', width=600, height=600)
+    cv.pack()
+    cv.create_image(300, 300, anchor=CENTER, image=filename)
+# 试玩新图
+def new():
+    global f1, img0, filename, v2
+    v2.set(0)
+    f1 = filedialog.askopenfilename() #选择单个文件，获取其路径；返回值为路径
+    img0 = Image.open(f1)                #antialias 高质量插入
+    img0 = img0.resize((700, 700), Image.Resampling.LANCZOS) #修改图片尺寸
+    filename = ImageTk.PhotoImage(img0)
+    cv.delete(ALL)  #删除掉原图
+    cv.create_image(300, 300, anchor=CENTER, image=filename)
+# 随机切换图片
+def change():
+    global f1, img0, filename, v2
+    v2.set(0)
+    f1 = 'img\%s.jpg' % (random.randint(0, 9))
+    img0 = Image.open(f1)
+    filename = ImageTk.PhotoImage(img0)
+    cv.delete(ALL)
+    cv.create_image(300, 300, anchor=CENTER, image=filename)
+# 获取并且进行图片切割
+def get_cut(event):
+    global f1, img0, filename, image_size, v1, v2
+    global cut_img, img_state, place_list, move_img
+    m = v1.get()
+    v2.set(0)
+    cut_img = []
+    move_img = []
+    img_state = []
+    list_box = []
+    place_list = []
+    x = image_size // m
+
+    white_img = Image.new(img0.mode, (x, x), color='white')
+
+    for j in range(0, m):
+        for i in range(0, m):
+            box = (x * i, x * j, x * i + x, x * j + x)           #左上角坐标和右下角坐标
+            pl = ((box[0] + box[2]) // 2, (box[1] + box[3]) // 2) #中心坐标
+            list_box.append(box)
+            place_list.append(pl)
+
+    new_image = [(img0.crop(box), 1) for box in list_box]
+    #img_crop()图片切割函数按照list_box坐标切割，得到新的列表
+    new_image[m * m - 1] = (white_img, 0, m * m)
+
+    for i in range(0, m * m):
+        cut_img.append((ImageTk.PhotoImage(image=new_image[i][0]), new_image[i][1], i + 1))
+        move_img.append((ImageTk.PhotoImage(image=new_image[i][0]), new_image[i][1], i + 1))
+        cv.create_image(place_list[i], anchor=CENTER, image=cut_img[i][0])#画布上创建图像
+    set_state()
+# 图片重排
+def reset():
+    global cut_img, place_list
+    v2.set(0)
+    m = v1.get()
+    random.shuffle(move_img)
+    for i in range(0, m * m):
+        cv.create_image(place_list[i], anchor=CENTER, image=move_img[i][0])
+    set_state()
+# 拼图的状态进行赋值
+def set_state():
+    global cut_img, move_img, img_state, v1
+    m = v1.get()
+    img_state = [[0 for i in range(v1.get())] for j in range(v1.get())] #m*m的二维列表
+    k = 0
+    for i in range(0, m):
+        for j in range(0, m):
+            img_state[i][j] = move_img[k][1]
+            k += 1
+
+# 判断鼠标点击的那张图的哪个邻图是空的
+def mouseClick(event):
+    global image_size, v1, img_state, place_list
+    global cut_img, move_img
+    m = v1.get()
+    img0_size = image_size // m
+    r = int(event.y // img0_size) #行号
+    c = int(event.x // img0_size) #列号
+    x1 = y1 = 100
+    # 找到可以动块
+    if img_state[r][c] == 0:
+        return
+    else:
+        for q in range(0,m):
+            for p in range(0,m):
+                if img_state[q][p] == 0:
+                    x1,y1=q,p
+                    break
+    if x1 != 100:
+        i = r * m + c
+        j = x1 * m + y1
+        new_img1 = move_img[i]
+        new_img2 = move_img[j]
+        cv.create_image(place_list[j], anchor=CENTER, image=new_img1[0])
+        cv.create_image(place_list[i], anchor=CENTER, image=new_img2[0])
+        move_img[i] = new_img2
+        move_img[j] = new_img1
+        v2.set(v2.get() + 1)
+        set_state()
+        if win():
+            showinfo(title='恭喜', message='你赢了')
+
+# 判断是否成功
+def win():
+    global cut_img, move_img, v1
+    m = v1.get()
+    for i in range(m * m):
+        if move_img[i][2] != cut_img[i][2]:
+            return False
+    return True
+
+e = Entry(text='0',fg='red')
+e.place(x=660, y=280, width=50)
+
+# 倒计时
+def count_back():
+    while float(e.get()):
+        time.sleep(0.1) #程序暂停的秒数；以0.1秒的时间流逝
+        v = str(round(float(e.get()) - 0.1, 1))
+        e['text'] = v
+        e.delete(0, END)
+        e.insert(0, v)
+        if win():
+            e.delete(0, END)
+            e.insert(0, 0)
+        try:
+            e.update()
+        except:
+            break
+    if not win():
+        showinfo(title='失败', message='你失败了')
+
+cv.bind('<Button-1>', mouseClick)
+
+l1 = Label(app, text='图片切割数量', font=('Arial', 12), )
+l1.place(x=610, y=40, height=30)
+comb = ttk.Combobox(app, textvariable=v1, values=[2, 3, 4, 5, 6])
+comb.place(x=720, y=40, width=30, height=30)
+comb.bind('<<ComboboxSelected>>', get_cut)
+
+l2 = Label(app, text='点 击 次 数 ', font=('Arial', 12))
+l2.place(x=610, y=15)
+l3 = Label(app, text='0', textvariable=v2, fg='red', font=('Arial', 13))
+l3.place(x=720, y=15)
+l5 = Label(app, text='秒', font=('Arial', 16),fg='blue')
+l5.place(x=730, y=280)
+
+btn1 = Button(app, text='查看原图', font=('Arial', 13,'bold'),bg='#3299cc', command=look)
+btn1.place(x=610, y=80, width=80, height=50)
+
+btn2 = Button(app, text='试玩新图', font=('Arial', 13,'bold'), bg='#00ff7f',command=new)
+btn2.place(x=710, y=80, width=80, height=50)
+
+btn3 = Button(app, text='切换图片', font=('Arial', 13,'bold'),bg='#00ff7f', command=change)
+btn3.place(x=610, y=150, width=80, height=50)
+
+btn4 = Button(app, text='图片重排', font=('Arial', 13,'bold'), bg='#3299cc',command=reset)
+btn4.place(x=710, y=150, width=80, height=50)
+
+btn5 = Button(app, fg='blue',text='挑战模式', font=('Arial', 15,'bold'),bg='purple',command=count_back)
+btn5.place(x=610, y=220, width=180, height=50)
+
+tip1 = Label(app, text='选择挑战模式要先自己设定时间', fg='red', font=('Arial', 10))
+tip1.place(x=600, y=320, width=200, height=50)
+tip2 = Label(app, text='超过时间后显示失败但仍可继续', fg='red', font=('Arial', 10))
+tip2.place(x=600, y=350, width=200, height=50)
+if __name__ == "__main__":
+    app.mainloop()

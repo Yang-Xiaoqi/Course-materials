@@ -1,0 +1,17 @@
+/*
+ test-词法分析 
+  08222213*/
+int main()
+{
+    //字符串测试
+    int a = 1;
+    int b = 0b10100;
+    int c = 012;
+    int d = 0x123;
+    int sum1 = 1;
+    for (int = 1; i <= 3; i++)
+    {
+        sum1 *=i; 
+
+    return 0;
+}

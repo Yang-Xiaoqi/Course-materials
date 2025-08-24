@@ -1,0 +1,13 @@
+Talk_CUMT/
+├── server/
+│   ├── main.c                                 # 服务器主进程
+│   ├── client_handler.c                 # 处理客户端线程
+│   ├── logger.c                              # 日志子进程模块   
+│   └── chat_log/                           # 聊天记录文件夹
+├── client/
+│   ├── main.c                                # 客户端主程序
+│   ├── ui.c                                     # 使用 ncurses 构建聊天界面
+│   └── network.c                          # 客户端 socket 通信模块
+├── shared/
+│   ├── common.h                        # 通信协议/数据结构
+│   └── utils.c                                # 工具函数、加锁、时间戳等 
